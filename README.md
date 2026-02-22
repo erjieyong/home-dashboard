@@ -65,6 +65,24 @@ All configuration is via environment variables (`.env` file):
 ]
 ```
 
+## Docker
+
+```bash
+# Build the image
+docker build -t home-dashboard .
+
+# Run with environment variables
+docker run -d -p 8080:8080 \
+  -e LTA_API_KEY=your_api_key_here \
+  home-dashboard
+```
+
+Or with an `.env` file:
+
+```bash
+docker run -d -p 8080:8080 --env-file .env home-dashboard
+```
+
 ## APIs Used
 
 - [LTA DataMall Bus Arrival v3](https://datamall.lta.gov.sg/content/datamall/en/dynamic-data.html) — real-time bus arrival times
