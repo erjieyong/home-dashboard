@@ -118,11 +118,23 @@
       flex: 1;
     }
 
+    .bus-section {
+      {% if device == 'kindle' %}
+      margin-bottom: 14px;
+      {% else %}
+      margin-bottom: 20px;
+      {% endif %}
+    }
+
+    .bus-section:last-child {
+      margin-bottom: 0;
+    }
+
     .bus-header {
       {% if device == 'kindle' %}
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       {% else %}
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       {% endif %}
     }
 
@@ -314,36 +326,40 @@
 
   <!-- ── Main: Bus arrivals ────────────────────────────── -->
   <div class="main">
-    <div class="bus-header">
-      <span class="bus-service">{{ bus_service_no }}</span>
-      <span class="bus-stop">{{ bus_stop_name }}</span>
-    </div>
-
-    {% if bus.error %}
-    <div class="error-message">{{ bus.error }}</div>
-    {% elif bus.arrivals | length == 0 %}
-    <div class="no-arrivals">No upcoming arrivals</div>
-    {% else %}
-    <div class="arrivals">
-      {% for arrival in bus.arrivals %}
-      <div class="arrival-card">
-        <div class="arrival-time">
-          {% if arrival.is_arriving %}
-          <div class="arrival-arriving">ARR</div>
-          {% else %}
-          <div class="arrival-minutes">{{ arrival.minutes_away }}</div>
-          <div class="arrival-label">min</div>
-          {% endif %}
-        </div>
-        <div class="arrival-meta">
-          <span class="{{ arrival.load.css_class }}">{{ arrival.load.display_text }}</span>
-          &middot; {{ arrival.bus_type.display_text }}{% if arrival.is_wheelchair_accessible %} &middot; &#9855;{% endif %}
-          &middot; {{ arrival.estimated_arrival | format_time }}
-        </div>
+    {% for section in bus_sections %}
+    <div class="bus-section">
+      <div class="bus-header">
+        <span class="bus-service">{{ section.config.service_no }}</span>
+        <span class="bus-stop">{{ section.config.stop_name }}</span>
       </div>
-      {% endfor %}
+
+      {% if section.result.error %}
+      <div class="error-message">{{ section.result.error }}</div>
+      {% elif section.result.arrivals | length == 0 %}
+      <div class="no-arrivals">No upcoming arrivals</div>
+      {% else %}
+      <div class="arrivals">
+        {% for arrival in section.result.arrivals %}
+        <div class="arrival-card">
+          <div class="arrival-time">
+            {% if arrival.is_arriving %}
+            <div class="arrival-arriving">ARR</div>
+            {% else %}
+            <div class="arrival-minutes">{{ arrival.minutes_away }}</div>
+            <div class="arrival-label">min</div>
+            {% endif %}
+          </div>
+          <div class="arrival-meta">
+            <span class="{{ arrival.load.css_class }}">{{ arrival.load.display_text }}</span>
+            &middot; {{ arrival.bus_type.display_text }}{% if arrival.is_wheelchair_accessible %} &middot; &#9855;{% endif %}
+            &middot; {{ arrival.estimated_arrival | format_time }}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
     </div>
-    {% endif %}
+    {% endfor %}
   </div>
 
   <!-- ── Footer ────────────────────────────────────────── -->

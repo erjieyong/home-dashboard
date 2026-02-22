@@ -4,7 +4,7 @@ A lightweight home dashboard website designed for Google Nest Hub 1 and Kindle 2
 
 ## Features
 
-- **Bus 34 arrival times** from Samudera Stn Exit A (LTA DataMall API)
+- **Bus arrival times** for multiple services — Bus 34 (Samudera Stn Exit A) and Bus 104 (Blk 413C) by default (LTA DataMall API)
 - **Weather forecast** for Punggol with temperature and humidity ranges (data.gov.sg)
 - **PM2.5 air quality index** for the north region (data.gov.sg)
 - **Current date and time** in SGT
@@ -49,14 +49,21 @@ All configuration is via environment variables (`.env` file):
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `LTA_API_KEY` | *(required)* | LTA DataMall API key |
-| `BUS_STOP_CODE` | `65629` | Bus stop code |
-| `BUS_SERVICE_NO` | `34` | Bus service number |
-| `BUS_STOP_NAME` | `Samudera Stn Exit A` | Display name for the bus stop |
+| `BUS_SERVICES` | *(see below)* | JSON array of bus services to track |
 | `WEATHER_AREA` | `Punggol` | Area for 2-hour weather forecast |
 | `PM25_REGION` | `north` | Region for PM2.5 reading (north/south/east/west/central) |
 | `REFRESH_SECONDS` | `30` | Page auto-refresh interval in seconds |
 | `HOST` | `0.0.0.0` | Server bind address |
 | `PORT` | `8080` | Server port |
+
+`BUS_SERVICES` defaults to:
+
+```json
+[
+  {"stop_code": "65629", "service_no": "34", "stop_name": "Samudera Stn Exit A"},
+  {"stop_code": "65651", "service_no": "104", "stop_name": "Blk 413C"}
+]
+```
 
 ## APIs Used
 

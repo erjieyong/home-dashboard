@@ -9,7 +9,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from home_dashboard.bus_api import BusArrivalResponse, fetch_bus_arrivals
-from home_dashboard.config import Config, load_config
+from home_dashboard.config import BusServiceConfig, Config, load_config
 from home_dashboard.weather_api import WeatherInfo, fetch_weather
 
 _SGT: timezone = timezone(timedelta(hours=8))
@@ -44,14 +44,20 @@ def create_app(config: Config | None = None) -> FastAPI:
             else:
                 device = "nest"
 
-        bus_result, weather_result = await asyncio.gather(
+        # Fetch all bus services + weather in parallel
+        bus_tasks: list[asyncio.Task[BusArrivalResponse]] = [
             asyncio.to_thread(
                 fetch_bus_arrivals,
                 api_key=config.lta_api_key,
-                bus_stop_code=config.bus_stop_code,
-                service_no=config.bus_service_no,
+                bus_stop_code=svc.stop_code,
+                service_no=svc.service_no,
                 base_url=config.lta_api_base_url,
-            ),
+            )
+            for svc in config.bus_services
+        ]
+
+        results = await asyncio.gather(
+            *bus_tasks,
             asyncio.to_thread(
                 fetch_weather,
                 area=config.weather_area,
@@ -59,16 +65,23 @@ def create_app(config: Config | None = None) -> FastAPI:
             ),
         )
 
+        bus_results: list[BusArrivalResponse] = list(results[:-1])
+        weather_result: WeatherInfo = results[-1]
+
+        # Pair each bus result with its config for display
+        bus_sections: list[dict] = [
+            {"config": svc, "result": result}
+            for svc, result in zip(config.bus_services, bus_results)
+        ]
+
         now_sgt: datetime = datetime.now(_SGT)
 
         return templates.TemplateResponse(
             request=request,
             name="dashboard.html",
             context={
-                "bus": bus_result,
+                "bus_sections": bus_sections,
                 "weather": weather_result,
-                "bus_service_no": config.bus_service_no,
-                "bus_stop_name": config.bus_stop_name,
                 "refresh_seconds": config.refresh_seconds,
                 "device": device,
                 "now": now_sgt,
