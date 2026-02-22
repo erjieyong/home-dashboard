@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="{{ refresh_seconds }}">
+  <title>Home Dashboard</title>
+  <style>
+    /* ── Reset ───────────────────────────────────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ── Base ────────────────────────────────────────────── */
+    html, body {
+      height: 100%;
+      font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+      {% if device == 'kindle' %}
+      background: #fff;
+      color: #000;
+      {% else %}
+      background: #1a1a2e;
+      color: #eee;
+      {% endif %}
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      {% if device == 'kindle' %}
+      padding: 12px;
+      {% else %}
+      padding: 18px 24px;
+      {% endif %}
+    }
+
+    /* ── Top bar ─────────────────────────────────────────── */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      {% if device == 'kindle' %}
+      border-bottom: 3px solid #000;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+      {% else %}
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      {% endif %}
+    }
+
+    .clock {
+      {% if device == 'kindle' %}
+      font-size: 48px;
+      {% else %}
+      font-size: 56px;
+      {% endif %}
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .date {
+      {% if device == 'kindle' %}
+      font-size: 16px;
+      margin-top: 2px;
+      {% else %}
+      font-size: 18px;
+      margin-top: 4px;
+      color: #aaa;
+      {% endif %}
+    }
+
+    .weather {
+      text-align: right;
+      {% if device == 'kindle' %}
+      font-size: 15px;
+      {% else %}
+      font-size: 16px;
+      {% endif %}
+      line-height: 1.5;
+    }
+
+    .weather-forecast {
+      {% if device == 'kindle' %}
+      font-size: 18px;
+      font-weight: 700;
+      {% else %}
+      font-size: 20px;
+      font-weight: 600;
+      {% endif %}
+    }
+
+    .weather-temp {
+      {% if device == 'kindle' %}
+      font-size: 16px;
+      {% else %}
+      font-size: 17px;
+      color: #ccc;
+      {% endif %}
+    }
+
+    .weather-pm25 {
+      {% if device == 'kindle' %}
+      font-size: 14px;
+      {% else %}
+      font-size: 15px;
+      {% endif %}
+    }
+
+    /* PM2.5 level colors (Nest Hub only; Kindle uses plain text) */
+    {% if device != 'kindle' %}
+    .aqi-good     { color: #4ecca3; }
+    .aqi-moderate { color: #ffe66d; }
+    .aqi-unhealthy{ color: #e94560; }
+    {% endif %}
+
+    /* ── Main content ────────────────────────────────────── */
+    .main {
+      flex: 1;
+    }
+
+    .bus-header {
+      {% if device == 'kindle' %}
+      margin-bottom: 12px;
+      {% else %}
+      margin-bottom: 16px;
+      {% endif %}
+    }
+
+    .bus-service {
+      {% if device == 'kindle' %}
+      font-size: 36px;
+      font-weight: 900;
+      {% else %}
+      font-size: 42px;
+      font-weight: 800;
+      color: #e94560;
+      {% endif %}
+      display: inline;
+    }
+
+    .bus-stop {
+      {% if device == 'kindle' %}
+      font-size: 16px;
+      display: block;
+      margin-top: 2px;
+      {% else %}
+      font-size: 18px;
+      color: #aaa;
+      margin-left: 12px;
+      {% endif %}
+    }
+
+    .error-message {
+      {% if device == 'kindle' %}
+      font-size: 18px;
+      padding: 16px;
+      border: 3px solid #000;
+      text-align: center;
+      {% else %}
+      font-size: 20px;
+      padding: 20px;
+      background: rgba(233, 69, 96, 0.15);
+      border-radius: 12px;
+      text-align: center;
+      color: #e94560;
+      {% endif %}
+    }
+
+    .no-arrivals {
+      {% if device == 'kindle' %}
+      font-size: 18px;
+      text-align: center;
+      padding: 24px 0;
+      {% else %}
+      font-size: 20px;
+      text-align: center;
+      padding: 32px 0;
+      color: #888;
+      {% endif %}
+    }
+
+    /* ── Arrival cards container ──────────────────────────── */
+    .arrivals {
+      display: flex;
+      {% if device == 'kindle' %}
+      flex-direction: column;
+      gap: 10px;
+      {% else %}
+      flex-direction: row;
+      gap: 16px;
+      {% endif %}
+    }
+
+    /* ── Single arrival card ─────────────────────────────── */
+    .arrival-card {
+      {% if device == 'kindle' %}
+      border: 3px solid #000;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      {% else %}
+      flex: 1;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      {% endif %}
+    }
+
+    .arrival-time {
+      {% if device == 'kindle' %}
+      min-width: 64px;
+      text-align: center;
+      {% endif %}
+    }
+
+    .arrival-minutes {
+      {% if device == 'kindle' %}
+      font-size: 40px;
+      font-weight: 900;
+      line-height: 1;
+      {% else %}
+      font-size: 56px;
+      font-weight: 800;
+      line-height: 1;
+      {% endif %}
+    }
+
+    .arrival-arriving {
+      {% if device == 'kindle' %}
+      font-size: 28px;
+      font-weight: 900;
+      line-height: 1;
+      {% else %}
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 1;
+      color: #4ecca3;
+      {% endif %}
+    }
+
+    .arrival-label {
+      {% if device == 'kindle' %}
+      font-size: 14px;
+      {% else %}
+      font-size: 16px;
+      color: #aaa;
+      margin-top: 2px;
+      {% endif %}
+    }
+
+    .arrival-meta {
+      {% if device == 'kindle' %}
+      font-size: 14px;
+      line-height: 1.6;
+      {% else %}
+      font-size: 14px;
+      margin-top: 12px;
+      color: #bbb;
+      line-height: 1.6;
+      {% endif %}
+    }
+
+    /* Load indicator colors (Nest Hub only) */
+    {% if device != 'kindle' %}
+    .load-seats    { color: #4ecca3; }
+    .load-standing { color: #ffe66d; }
+    .load-full     { color: #e94560; }
+    .load-unknown  { color: #888; }
+    {% endif %}
+
+    /* ── Footer ──────────────────────────────────────────── */
+    .footer {
+      {% if device == 'kindle' %}
+      margin-top: 14px;
+      padding-top: 8px;
+      border-top: 2px solid #000;
+      font-size: 13px;
+      text-align: center;
+      {% else %}
+      margin-top: 16px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 14px;
+      text-align: center;
+      color: #666;
+      {% endif %}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Top bar: Clock + Weather ──────────────────────── -->
+  <div class="top-bar">
+    <div class="time-block">
+      <div class="clock">{{ now.strftime('%H:%M') }}</div>
+      <div class="date">{{ now.strftime('%a, %d %b') }}</div>
+    </div>
+    <div class="weather">
+      {% if weather.error %}
+      <div>Weather unavailable</div>
+      {% else %}
+      <div class="weather-forecast">{{ weather.forecast }}</div>
+      <div class="weather-temp">{{ weather.temp_low }}&ndash;{{ weather.temp_high }}&deg;C &middot; {{ weather.humidity_low }}&ndash;{{ weather.humidity_high }}%</div>
+      {% if weather.pm25 is not none %}
+      <div class="weather-pm25">
+        PM2.5: <span class="{{ weather.pm25_css_class }}">{{ weather.pm25 }} {{ weather.pm25_level }}</span>
+      </div>
+      {% endif %}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── Main: Bus arrivals ────────────────────────────── -->
+  <div class="main">
+    <div class="bus-header">
+      <span class="bus-service">{{ bus_service_no }}</span>
+      <span class="bus-stop">{{ bus_stop_name }}</span>
+    </div>
+
+    {% if bus.error %}
+    <div class="error-message">{{ bus.error }}</div>
+    {% elif bus.arrivals | length == 0 %}
+    <div class="no-arrivals">No upcoming arrivals</div>
+    {% else %}
+    <div class="arrivals">
+      {% for arrival in bus.arrivals %}
+      <div class="arrival-card">
+        <div class="arrival-time">
+          {% if arrival.is_arriving %}
+          <div class="arrival-arriving">ARR</div>
+          {% else %}
+          <div class="arrival-minutes">{{ arrival.minutes_away }}</div>
+          <div class="arrival-label">min</div>
+          {% endif %}
+        </div>
+        <div class="arrival-meta">
+          <span class="{{ arrival.load.css_class }}">{{ arrival.load.display_text }}</span>
+          &middot; {{ arrival.bus_type.display_text }}{% if arrival.is_wheelchair_accessible %} &middot; &#9855;{% endif %}
+          &middot; {{ arrival.estimated_arrival | format_time }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ── Footer ────────────────────────────────────────── -->
+  <div class="footer">
+    Updated {{ now.strftime('%H:%M') }} &middot; Refreshes every {{ refresh_seconds }}s
+  </div>
+
+</body>
+</html>
