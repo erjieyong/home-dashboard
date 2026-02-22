@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% if now.hour >= 6 %}
   <meta http-equiv="refresh" content="{{ refresh_seconds }}">
+  {% endif %}
   <title>Home Dashboard</title>
   <style>
     /* ── Reset ───────────────────────────────────────────── */
