@@ -3,6 +3,12 @@ services:
     image: erjieyong/home-dashboard:latest
     ports:
       - "8080:8080"
-    env_file:
-      - .env
+    environment:
+      - LTA_API_KEY=your_api_key_here
+      - BUS_SERVICES=[{"stop_code":"65629","service_no":"34","stop_name":"Samudera Stn Exit A"},{"stop_code":"65651","service_no":"104","stop_name":"Blk 413C"}]
+      - WEATHER_AREA=Punggol
+      - PM25_REGION=north
+      - REFRESH_SECONDS=30
+      - HOST=0.0.0.0
+      - PORT=8080
     restart: unless-stopped
