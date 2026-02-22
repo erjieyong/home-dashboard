@@ -69,7 +69,10 @@ All configuration is via environment variables (`.env` file):
 
 ```bash
 # Build the image
-docker build -t home-dashboard .
+docker build --platform linux/amd64 -t erjieyong/home-dashboard:latest -t erjieyong/home-dashboard:0.1.0 .
+
+# docker push the image
+docker push erjieyong/home-dashboard:latest && docker push erjieyong/home-dashboard:0.1.0
 
 # Run with environment variables
 docker run -d -p 8080:8080 \
